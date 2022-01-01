@@ -5,6 +5,9 @@ import mysql.connector
 from mysql.connector import errorcode
 import numpy as np
 import math
+import os
+import pymysql
+
 from math import pi
 def shift(arr, num=1, fill_value=np.nan):
     result = np.empty_like(arr)
@@ -18,13 +21,11 @@ def shift(arr, num=1, fill_value=np.nan):
         result[:] = arr
     return result
 
-config = {
-    'user': 'root',
-    'password': '',
-    'host': 'localhost',
-    'raise_on_warnings': True
-}
+db_user = os.environ.get('CLOUD_SQL_USERNAME')
+db_password = os.environ.get('CLOUD_SQL_PASSWORD')
+db_connection_name = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
 
+"""
 try:
     cnx = mysql.connector.connect(**config)
     print("FUTURES: Bağlantı başarılı")
@@ -35,6 +36,21 @@ except mysql.connector.Error as err:
         print("FUTURES: Database does not exist")
     else:
         print("FUTURES: ", err)
+    """
+
+if os.environ.get('GAE_ENV') == 'standard':
+    # If deployed, use the local socket interface for accessing Cloud SQL
+    unix_socket = '/cloudsql/{}'.format(db_connection_name)
+    cnx = pymysql.connect(user=db_user, password=db_password,
+                              unix_socket=unix_socket)
+else:
+    # If running locally, use the TCP connections instead
+    # Set up Cloud SQL Proxy (cloud.google.com/sql/docs/mysql/sql-proxy)
+    # so that your application can use 127.0.0.1:3306 to connect to your
+    # Cloud SQL instance
+    host = '127.0.0.1'
+    cnx = pymysql.connect(user=db_user, password=db_password, host=host)
+
 cnx.autocommit = True
 cursor = cnx.cursor()
 
