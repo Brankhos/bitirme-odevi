@@ -21,9 +21,6 @@ def shift(arr, num=1, fill_value=np.nan):
         result[:] = arr
     return result
 
-db_user = os.environ.get('CLOUD_SQL_USERNAME')
-db_password = os.environ.get('CLOUD_SQL_PASSWORD')
-db_connection_name = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
 
 """
 try:
@@ -38,27 +35,35 @@ except mysql.connector.Error as err:
         print("FUTURES: ", err)
     """
 
-if os.environ.get('GAE_ENV') == 'standard':
-    # If deployed, use the local socket interface for accessing Cloud SQL
-    unix_socket = '/cloudsql/{}'.format(db_connection_name)
-    cnx = pymysql.connect(user=db_user, password=db_password,
-                              unix_socket=unix_socket)
-else:
-    # If running locally, use the TCP connections instead
-    # Set up Cloud SQL Proxy (cloud.google.com/sql/docs/mysql/sql-proxy)
-    # so that your application can use 127.0.0.1:3306 to connect to your
-    # Cloud SQL instance
-    host = '127.0.0.1'
-    cnx = pymysql.connect(user=db_user, password=db_password, host=host)
 
-cnx.autocommit = True
-cursor = cnx.cursor()
 
 
 
 app = Flask(__name__)
 @app.route("/")
 def home():
+    
+    db_user = os.environ.get('CLOUD_SQL_USERNAME')
+    db_password = os.environ.get('CLOUD_SQL_PASSWORD')
+    db_connection_name = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
+
+    if os.environ.get('GAE_ENV') == 'standard':
+        # If deployed, use the local socket interface for accessing Cloud SQL
+        unix_socket = '/cloudsql/{}'.format(db_connection_name)
+        cnx = pymysql.connect(user=db_user, password=db_password,
+                                unix_socket=unix_socket)
+    else:
+        # If running locally, use the TCP connections instead
+        # Set up Cloud SQL Proxy (cloud.google.com/sql/docs/mysql/sql-proxy)
+        # so that your application can use 127.0.0.1:3306 to connect to your
+        # Cloud SQL instance
+        host = '127.0.0.1'
+        cnx = pymysql.connect(user=db_user, password=db_password, host=host)
+
+    cnx.autocommit = True
+    cursor = cnx.cursor()
+
+
     try:
         cursor.execute("USE {}".format(configs.durak_db))
     except mysql.connector.Error as err:
@@ -69,10 +74,34 @@ def home():
     duraklar = "<br>".join("<a href=\"durak_no="+x[2]+"\">"+x[2][0:4]+" | "+x[2][4:].replace("_"," ").upper() +"</a>" for x in records_all)
     html = durak_text + duraklar
 
+    cursor.close()
+    cnx.close()
     return html
 
 @app.route("/durak_no=<durak_no>")
 def otobus(durak_no):
+
+    db_user = os.environ.get('CLOUD_SQL_USERNAME')
+    db_password = os.environ.get('CLOUD_SQL_PASSWORD')
+    db_connection_name = os.environ.get('CLOUD_SQL_CONNECTION_NAME')
+
+    if os.environ.get('GAE_ENV') == 'standard':
+        # If deployed, use the local socket interface for accessing Cloud SQL
+        unix_socket = '/cloudsql/{}'.format(db_connection_name)
+        cnx = pymysql.connect(user=db_user, password=db_password,
+                                unix_socket=unix_socket)
+    else:
+        # If running locally, use the TCP connections instead
+        # Set up Cloud SQL Proxy (cloud.google.com/sql/docs/mysql/sql-proxy)
+        # so that your application can use 127.0.0.1:3306 to connect to your
+        # Cloud SQL instance
+        host = '127.0.0.1'
+        cnx = pymysql.connect(user=db_user, password=db_password, host=host)
+
+    cnx.autocommit = True
+    cursor = cnx.cursor()
+
+
     try:
         cursor.execute("USE {}".format(configs.durak_db))
     except mysql.connector.Error as err:
@@ -182,6 +211,10 @@ def otobus(durak_no):
     html_head = "Durak numarası: {}<br>Durak adı: {}".format(durak_no[:4],durak_no[4:].replace("_"," ").upper())
     html_oto_list = "<br>" + "<br>".join(x for x in oto_list_array)
     html = html_head + html_oto_list
+
+
+    cursor.close()
+    cnx.close()
     return html
 
 if __name__ == "__main__":
