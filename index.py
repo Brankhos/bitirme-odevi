@@ -20,7 +20,7 @@ def shift(arr, num=1, fill_value=np.nan):
 
 config = {
     'user': 'root',
-    'password': '123456',
+    'password': '',
     'host': 'localhost',
     'raise_on_warnings': True
 }
@@ -169,4 +169,7 @@ def otobus(durak_no):
     return html
 
 if __name__ == "__main__":
-    app.run()
+    # This is used when running locally only. When deploying to Google App
+    # Engine, a webserver process such as Gunicorn will serve the app.
+    app.run(host='127.0.0.1', port=8080, debug=True)
+    # [END gae_flex_quickstart]
