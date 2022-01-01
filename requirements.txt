@@ -3,3 +3,7 @@ gunicorn==20.1.0
 numpy
 mysql-connector-python
 pip
+psycopg2
+psycopg2-binary
+PyMySQL
+SQLAlchemy
