@@ -20,7 +20,7 @@ def shift(arr, num=1, fill_value=np.nan):
 
 config = {
     'user': 'root',
-    'password': '',
+    'password': '123456',
     'host': 'localhost',
     'raise_on_warnings': True
 }
